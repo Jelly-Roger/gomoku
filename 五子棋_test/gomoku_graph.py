@@ -47,7 +47,7 @@ def EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2):  # 监听
     global initChessList
     global Laststep
     # debug
-    #chess_ai = gomoku_ai.AI(initChessList)
+    # chess_ai = gomoku_ai.AI(initChessList)
 
     for event in pygame.event.get():
 
@@ -109,6 +109,7 @@ def EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2):  # 监听
                                                      chess_ai.cal_live_four(chess_ai.pos_black, gomoku_ai.key_black)))
         print("ai act: %d %d " % chess_ai.ab_search())
         """
+
 
 def judgeResult(i, j, value):  # 判断游戏是否结束
     global ResultFlag

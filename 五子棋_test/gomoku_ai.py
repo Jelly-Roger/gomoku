@@ -40,7 +40,7 @@ class AI:
             # 剪枝
             if val >= b:
                 return val, act[0], act[1]
-            if val >= a:
+            if val > a:
                 a = val
                 best_act = act
         return val, best_act[0], best_act[1]
@@ -58,7 +58,7 @@ class AI:
             self.pop(dep, act)
             if val <= a:
                 return val, act[0], act[1]
-            if val <= b:
+            if val < b:
                 b = val
                 best_act = act
         return val, best_act[0], best_act[1]
@@ -80,27 +80,17 @@ class AI:
         self.state_board[act[0]][act[1]].value = key_block
 
     def action(self):
-        mx_r_w, mx_c_w, mn_r_w, mn_c_w = 0, 0, 0, 0
-        mx_r_b, mx_c_b, mn_r_b, mn_c_b = 0, 0, 0, 0
-        #print(self.pos_white)
-
-
-        if len(self.pos_white) != 0:
-            mx_r_w, mx_c_w = np.max(self.pos_white, axis=0)
-            mn_r_w, mn_c_w = np.min(self.pos_white, axis=0)
-
-        if len(self.pos_black) != 0:
-            mx_r_b, mx_c_b = np.max(self.pos_black, axis=0)
-            mn_r_b, mn_c_b = np.min(self.pos_black, axis=0)
-        else:
-            mx_r_b, mx_c_b = mx_r_w, mx_c_w
-            mn_r_b, mn_c_b = mn_r_w, mn_c_w
+        mx_r, mx_c, mn_r, mn_c = 0, 0, 0, 0
+        pos = self.pos_white + self.pos_black
+        if len(pos) != 0:
+            mx_r, mx_c = np.max(pos, axis=0)
+            mn_r, mx_c = np.min(pos, axis=0)
 
         # 构造可下子的方形区域
-        r_begin = min(max(0, mn_r_w - 2), max(0, mn_r_b - 2))
-        r_end = max(min(14, mx_r_w + 2), min(14, mx_r_b + 2))
-        c_begin = min(max(0, mn_c_w - 2), max(0, mn_c_b - 2))
-        c_end = max(min(14, mx_c_w + 2), min(14, mx_c_b + 2))
+        r_begin = max(0, mn_r - 2)
+        r_end = min(self.size - 1, mx_r + 2)
+        c_begin = max(0, mn_c - 2)
+        c_end = min(self.size - 1, mx_c + 2)
 
         act = []
         r = r_begin
