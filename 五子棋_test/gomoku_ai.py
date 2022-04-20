@@ -26,6 +26,10 @@ class AI:
                 elif state_board[i][j].value == key_white:
                     self.pos_white.append((i, j))
 
+    def clear(self):
+        self.pos_black.clear()
+        self.pos_white.clear()
+
     def ab_search(self):  # 返回下一步的坐标
         _, x, y = self.max_value(-sys.maxsize - 1, sys.maxsize, depth)
         return x, y
@@ -112,7 +116,7 @@ class AI:
         num_lt = self.live_three()
         num_rf = self.rush_four()
         num_st = self.sleep_three()
-        return num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st*value_st
+        return num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st * value_st
 
     def in_board(self, row, col):
         if row < 0 or row > self.size - 1 or col < 0 or col > self.size - 1:
@@ -225,8 +229,9 @@ class AI:
 
     def cal_sleep_three(self, pos, key):
         num = 0
+        l = len(dx)
         for r, c in pos:
-            for i in range(len(dx)):
+            for i in range(l):
                 if self.same(r + dx[i], c + dy[i], key) and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and \
                         ((not self.same(r - 2 * dx[i], c - 2 * dy[i], key_block)
                           and self.same(r - dx[i], c - dy[i], key_block)
@@ -264,3 +269,40 @@ class AI:
                                                                                        c + 4 * dy[i], key):
                     num = num + 1
         return num
+
+    def live_two(self):
+        pass
+
+    def cal_live_two(self, pos, key):
+        num = 0
+        l = len(dx)
+        for r, c in pos:
+            for i in range(l):
+                if self.same(r - dx[i], c - dy[i], key_block) and self.same(r + dx[i], c + dy[i], key) \
+                        and self.same(r + 2 * dx[i], c + 2 * dy[i], key_block) and \
+                        ((self.same(r - 3 * dx[i], c - 3 * dy[i], key_block) and self.same(r - 2 * dx[i], c - 2 * dy[i],
+                                                                                           key_block))
+                         or
+                         (self.same(r - 2 * dx[i], c - 2 * dy[i], key_block) and self.same(r + 3 * dx[i], c + 3 * dy[i],
+                                                                                           key_block))
+                         or
+                         (self.same(r + 3 * dx[i], c + 3 * dy[i], key_block) and self.same(r + 4 * dx[i], c + 4 * dy[i],
+                                                                                           key_block))):
+                    num = num + 1
+                elif self.same(r - dx[i], c - dy[i], key_block) and self.same(r + dx[i], c + dy[i], key_block) \
+                        and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and self.same(r + 3 * dx[i], c + 3 * dy[i],
+                                                                                       key_block) and \
+                        (self.same(r - 2 * dx[i], c - 2 * dy[i], key_block) or (
+                                self.same(r + 4 * dx[i], c + 4 * dy[i], key_block))):
+                    num = num + 1
+                elif self.same(r + dx[i], c + dy[i], key_block) and self.same(r + 2 * dx[i], c + 2 * dy[i], key_block) \
+                        and self.same(r + 3 * dx[i], c + 3 * dy[i], key) and self.same(r - dx[i], c - dy[i], key_block) \
+                        and self.same(r + 4 * dx[i], c + 4 * dy[i], key_block):
+                    num = num + 1
+        return num
+
+    def sleep_two(self):
+        pass
+
+    def cal_sleep_two(self, pos, key):
+        pass

@@ -2,226 +2,191 @@ import pygame
 import time
 import sys
 from pygame.locals import *
-import gomoku_ai
 
-initChessList = []  # 保存棋盘坐标
-initRole = 1  # 1表示黑棋 2表示白棋
-ResultFlag = False  # 结果标志
-winvalue = 1  # 获胜方
-Laststep = []  # 记录已经下过的棋的信息
-white = (255, 255, 255)  # 白色
-black = (0, 0, 0)  # 黑色
-screen_width = 800  # 画布宽度
-screen_height = 620  # 画布长度
-console_x = 615  # 控制区域位置x
-console_y = 0  # 控制区域位置y
-button_width = (screen_width - console_x) - 50  # 按钮宽度
-button_height = 50  # 按钮长度
-button_x = (screen_width + console_x) / 2 - button_width / 2  # 按钮位置
-button_y = screen_height / 3 - button_height / 2
+key_black = 1
+key_white = 2
+key_block = 0
+white = (255, 255, 255)
+black = (0, 0, 0)
 color_restart = (230, 67, 64)  # restart按钮颜色
 color_regret = (26, 173, 25)  # regret按钮颜色
 grey = (200, 200, 200)  # 点击后按钮的颜色
 
 
-class StornPoint():  # 每一个点的基本元素
-    def __init__(self, x, y, value):
-        self.x = x  # 初始化变量
-        self.y = y
+class Element:
+    def __init__(self, pointX, pointY, value):
+        self.x = pointX
+        self.y = pointY
         self.value = value
 
 
-def initChessSquare(x, y):  # 初始化棋盘
-    for i in range(15):
-        rowlist = []
-        for j in range(15):
-            pointX = x + 40 * j  # 行列与实际画布坐标的换算
-            pointY = y + 40 * i
-            sp = StornPoint(pointX, pointY, 0)
-            rowlist.append(sp)
-        initChessList.append(rowlist)
+class Map:
+    def __init__(self):
+        self.len = 15
+        self.ChessBoard = []
+        self.start_x = 27
+        self.start_y = 27
+        self.winner = 0
+        self.Laststep = []
+
+    def init_board(self):
+        for i in range(self.len):
+            rowlist = []
+            for j in range(self.len):
+                pointX = self.start_x + 40 * j
+                pointY = self.start_y + 40 * i
+                rowlist.append(Element(pointX, pointY, key_block))
+            self.ChessBoard.append(rowlist)
+
+    def judge(self, row, col, key):
+        for x in range(col - 4, col + 5):  # 目标点的左4个右4个
+            if x >= 0 and x + 4 < 15:
+                if self.ChessBoard[row][x].value == key and \
+                        self.ChessBoard[row][x + 1].value == key and \
+                        self.ChessBoard[row][x + 2].value == key and \
+                        self.ChessBoard[row][x + 3].value == key and \
+                        self.ChessBoard[row][x + 4].value == key:
+                    self.winner = key
+                    return True
+
+        for y in range(row - 4, row + 5):
+            if y >= 0 and y + 4 < 15:
+                if self.ChessBoard[y][col].value == key and \
+                        self.ChessBoard[y + 1][col].value == key and \
+                        self.ChessBoard[y + 2][col].value == key and \
+                        self.ChessBoard[y + 3][col].value == key and \
+                        self.ChessBoard[y + 4][col].value == key:
+                    self.winner = key
+                    return True
+
+        for x in range(row - 4, row + 5):
+            for y in range(col - 4, col + 5):
+                if x - y == row - col:
+                    if x >= 0 and x + 4 < 15 and y >= 0 and y + 4 < 15:
+                        if self.ChessBoard[x][y].value == key and \
+                                self.ChessBoard[x + 1][y + 1].value == key and \
+                                self.ChessBoard[x + 2][y + 2].value == key and \
+                                self.ChessBoard[x + 3][y + 3].value == key and \
+                                self.ChessBoard[x + 4][y + 4].value == key:
+                            self.winner = key
+                            return True
+
+                if x + y == row + col:
+                    if x >= 0 and x + 4 < 15 and y < 15 and y - 4 >= 0:
+                        if self.ChessBoard[x][y].value == key and \
+                                self.ChessBoard[x + 1][y - 1].value == key and \
+                                self.ChessBoard[x + 2][y - 2].value == key and \
+                                self.ChessBoard[x + 3][y - 3].value == key and \
+                                self.ChessBoard[x + 4][y - 4].value == key:
+                            self.winner = key
+                            return True
+        return False
+
+    def regret(self, steps, Role):
+        cnt = 0
+        while True:
+            if len(self.Laststep) == 0:
+                break
+            else:
+                temp = self.Laststep.pop()
+                self.ChessBoard[temp.x][temp.y].value = key_block
+                Role = temp.value
+                cnt = cnt + 1
+                if cnt >= steps:
+                    break
+
+    def clear(self):
+        self.ChessBoard.clear()
+        self.winner = 0
 
 
-def EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2):  # 监听
-    global initRole
-    global initChessList
-    global Laststep
-    # debug
-    # chess_ai = gomoku_ai.AI(initChessList)
+class Graph:
+    def __init__(self, screen_width, screen_height, console_x, console_y, title):
+        self.title = title
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.console_x = console_x
+        self.console_y = console_y
 
-    for event in pygame.event.get():
+        self.button_width = 0
+        self.button_height = 0
+        self.button_x = 0
+        self.button_y = 0
 
-        if event.type == QUIT:  # 退出
-            pygame.quit()
-            sys.exit()
-        if event.type == MOUSEBUTTONDOWN:  # 按下鼠标
-            x, y = pygame.mouse.get_pos()
-            # 点击了restart的按钮
-            if x >= button_x and x <= button_x + button_width and \
-                    y >= button_y and y <= button_y + button_height:
-                pygame.draw.rect(screen, grey, (button_x, button_y, button_width, button_height))
-                screen.blit(text1, (posx_1, posy_1))
-                initChessList = []  # 重置
-                Laststep = []
-                initRole = 1
-                initChessSquare(27, 27)
-                return
-            # 点击了悔棋的按钮
-            if x >= button_x and x <= button_x + button_width and \
-                    y >= 2 * button_y and y <= 2 * button_y + button_height:
-                pygame.draw.rect(screen, grey, (button_x, 2 * button_y, button_width, button_height))
-                screen.blit(text2, (posx_2, posy_2))
-                if len(Laststep) != 0:  # 恢复上一步的盘面
-                    temp = Laststep.pop()
-                    initChessList[temp.x][temp.y].value = 0
-                    initRole = temp.value
-                    return
-            i = 0
-            j = 0
-            for temp in initChessList:
-                for point in temp:
-                    if x >= point.x - 10 and x <= point.x + 10 and y >= point.y - 10 and y <= point.y + 10:
-                        if point.value == 0 and initRole == 1:
-                            point.value = 1  # 黑棋的值
-                            Laststep.append(StornPoint(i, j, point.value))
-                            judgeResult(i, j, point.value)
-                            initRole = 2
-                        elif point.value == 0 and initRole == 2:
-                            point.value = 2  # 白棋的值
-                            Laststep.append(StornPoint(i, j, point.value))
-                            judgeResult(i, j, point.value)
-                            initRole = 1
-                        break
-                    j += 1
-                i += 1
-                j = 0
-        if event.type == MOUSEBUTTONUP:  # 如果松开鼠标
-            pygame.draw.rect(screen, color_restart, (button_x, button_y, button_width, button_height))
-            screen.blit(text1, (posx_1, posy_1))
-            pygame.draw.rect(screen, color_regret, (button_x, 2 * button_y, button_width, button_height))
-            screen.blit(text2, (posx_2, posy_2))
-            pygame.display.update()
-        """
-        # debug
-        print("white live_three:%d  live_four:%d" % (chess_ai.cal_live_three(chess_ai.pos_white, gomoku_ai.key_white),
-                                                     chess_ai.cal_live_four(chess_ai.pos_white, gomoku_ai.key_white)))
-        print("black live_three:%d  live_four:%d" % (chess_ai.cal_live_three(chess_ai.pos_black, gomoku_ai.key_black),
-                                                     chess_ai.cal_live_four(chess_ai.pos_black, gomoku_ai.key_black)))
-        print("ai act: %d %d " % chess_ai.ab_search())
-        """
+    def calc(self):
+        self.button_width = (self.screen_width - self.console_x) - 50  # 按钮宽度
+        self.button_height = 50  # 按钮长度
+        self.button_x = (self.screen_width + self.console_x) / 2 - self.button_width / 2  # 按钮位置
+        self.button_y = self.screen_height / 3 - self.button_height / 2
 
+    def init_screen(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        pygame.display.set_caption(self.title)
 
-def judgeResult(i, j, value):  # 判断游戏是否结束
-    global ResultFlag
-    global winvalue
-    flag = False
-    for x in range(j - 4, j + 5):  # 目标点的左4个右4个
-        if x >= 0 and x + 4 < 15:
-            if initChessList[i][x].value == value and \
-                    initChessList[i][x + 1].value == value and \
-                    initChessList[i][x + 2].value == value and \
-                    initChessList[i][x + 3].value == value and \
-                    initChessList[i][x + 4].value == value:
-                flag = True
-                ResultFlag = flag
-                winvalue = value
-                return
+    def load_pic(self):
+        self.background = pygame.image.load("images/background.png")
+        self.white = pygame.image.load("images/white.png")
+        self.black = pygame.image.load("images/black.png")
+        self.result = pygame.image.load("images/result.jpg")
 
-    for y in range(i - 4, i + 5):
-        if y >= 0 and y + 4 < 15:
-            if initChessList[y][j].value == value and \
-                    initChessList[y + 1][j].value == value and \
-                    initChessList[y + 2][j].value == value and \
-                    initChessList[y + 3][j].value == value and \
-                    initChessList[y + 4][j].value == value:
-                flag = True
-                ResultFlag = flag
-                winvalue = value
-                return
+    def load_text(self):
+        font = pygame.font.Font(None, 30)
+        self.text1 = font.render('restart', True, white)
+        tw1, th1 = self.text1.get_size()
+        self.posx_1 = self.button_x + self.button_width / 2 - tw1 / 2
+        self.posy_1 = self.button_y + self.button_height / 2 - th1 / 2
+        self.text2 = font.render('regret', True, white)
+        tw2, th2 = self.text2.get_size()
+        self.posx_2 = self.button_x + self.button_width / 2 - tw2 / 2
+        self.posy_2 = 2 * self.button_y + self.button_height / 2 - th2 / 2
 
-    for x in range(i - 4, i + 5):
-        for y in range(j - 4, j + 5):
-            if x - y == i - j:
-                if x >= 0 and x + 4 < 15 and y >= 0 and y + 4 < 15:
-                    if initChessList[x][y].value == value and \
-                            initChessList[x + 1][y + 1].value == value and \
-                            initChessList[x + 2][y + 2].value == value and \
-                            initChessList[x + 3][y + 3].value == value and \
-                            initChessList[x + 4][y + 4].value == value:
-                        flag = True
-                        ResultFlag = flag
-                        winvalue = value
-                        return
-            if x + y == i + j:
-                if x >= 0 and x + 4 < 15 and y < 15 and y - 4 >= 0:
-                    if initChessList[x][y].value == value and \
-                            initChessList[x + 1][y - 1].value == value and \
-                            initChessList[x + 2][y - 2].value == value and \
-                            initChessList[x + 3][y - 3].value == value and \
-                            initChessList[x + 4][y - 4].value == value:
-                        flag = True
-                        ResultFlag = flag
-                        winvalue = value
-                        return
-
-
-def main():
-    global initChessList, ResultFlag, winvalue, Laststep
-    initChessSquare(27, 27)
-    # pygame的实现
-    pygame.init()
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("五子棋")
-    background = pygame.image.load("images/bg.png")
-    whiteStorn = pygame.image.load("images/storn_white.png")
-    blackStorn = pygame.image.load("images/storn_black.png")
-    resultStorn = pygame.image.load("images/resultStorn.jpg")
-    # 设置字体 计算字体位置
-    font = pygame.font.Font(None, 30)
-    text1 = font.render('restart', True, white)
-    tw1, th1 = text1.get_size()
-    posx_1 = button_x + button_width / 2 - tw1 / 2
-    posy_1 = button_y + button_height / 2 - th1 / 2
-    text2 = font.render('regret', True, white)
-    tw2, th2 = text2.get_size()
-    posx_2 = button_x + button_width / 2 - tw2 / 2
-    posy_2 = 2 * button_y + button_height / 2 - th2 / 2
-    # 绘画按钮
-    pygame.draw.rect(screen, white, (console_x, console_y, screen_width - console_x, screen_height - 5))
-    pygame.draw.rect(screen, color_restart, (button_x, button_y, button_width, button_height))
-    pygame.draw.rect(screen, color_regret, (button_x, 2 * button_y, button_width, button_height))
-    screen.blit(text1, (posx_1, posy_1))
-    screen.blit(text2, (posx_2, posy_2))
-
-    while True:
-        # 绘画盘面
-        screen.blit(background, (0, 0))
-        for temp in initChessList:
-            for point in temp:
-                if point.value == 1:
-                    screen.blit(blackStorn, (point.x - 18, point.y - 18))
-                if point.value == 2:
-                    screen.blit(whiteStorn, (point.x - 18, point.y - 18))
-        # 如果游戏结束
-        if ResultFlag == True:
-            if winvalue == 1:
-                print("黑方获胜！")
-            elif winvalue == 2:
-                print("白方获胜！")
-            # 重置盘面
-            initChessList = []
-            Laststep = []
-            initChessSquare(27, 27)
-            screen.blit(resultStorn, (200, 200))
+    def draw_button(self, clicked):
+        pygame.draw.rect(self.screen, white,
+                         (self.console_x, self.console_y, self.screen_width - self.console_x, self.screen_height - 5))
+        if clicked == 0:
+            color1 = color_restart
+            color2 = color_regret
+        elif clicked == 1:
+            color1 = grey
+            color2 = color_regret
+        else:
+            color1 = color_restart
+            color2 = grey
+        pygame.draw.rect(self.screen, color1, (self.button_x, self.button_y, self.button_width, self.button_height))
+        pygame.draw.rect(self.screen, color2, (self.button_x, 2 * self.button_y, self.button_width, self.button_height))
         pygame.display.update()
 
-        if ResultFlag == True:
-            time.sleep(3)
-            ResultFlag = False
-            winvalue = 1
+    def draw_text(self):
+        self.screen.blit(self.text1, (self.posx_1, self.posy_1))
+        self.screen.blit(self.text2, (self.posx_2, self.posy_2))
+        pygame.display.update()
 
-        EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2)
+    def draw_board(self, map):
+        self.screen.blit(self.background, (0, 0))
+        for temp in map.ChessBoard:
+            for point in temp:
+                if point.value == 1:
+                    self.screen.blit(self.black, (point.x - 18, point.y - 18))
+                if point.value == 2:
+                    self.screen.blit(self.white, (point.x - 18, point.y - 18))
+        pygame.display.update()
 
+    def print_winner(self, delay):
+        self.screen.blit(self.result, (200, 200))
+        pygame.display.update()
+        time.sleep(delay)
 
-if __name__ == '__main__':
-    main()
+    def click_restart(self, x, y):
+        if x >= self.button_x and x <= self.button_x + self.button_width and \
+                y >= self.button_y and y <= self.button_y + self.button_height:
+            return True
+        else:
+            return False
+
+    def click_regret(self, x, y):
+        if x >= self.button_x and x <= self.button_x + self.button_width and \
+                y >= 2 * self.button_y and y <= 2 * self.button_y + self.button_height:
+            return True
+        else:
+            return False
