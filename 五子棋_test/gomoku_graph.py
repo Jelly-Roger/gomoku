@@ -2,6 +2,7 @@ import pygame
 import time
 import sys
 from pygame.locals import *
+import gomoku_ai
 
 initChessList = []  # 保存棋盘坐标
 initRole = 1  # 1表示黑棋 2表示白棋
@@ -42,10 +43,14 @@ def initChessSquare(x, y):  # 初始化棋盘
 
 
 def EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2):  # 监听
+    global initRole
+    global initChessList
+    global Laststep
+    # debug
+    #chess_ai = gomoku_ai.AI(initChessList)
+
     for event in pygame.event.get():
-        global initRole
-        global initChessList
-        global Laststep
+
         if event.type == QUIT:  # 退出
             pygame.quit()
             sys.exit()
@@ -96,7 +101,14 @@ def EventHander(screen, text1, text2, posx_1, posy_1, posx_2, posy_2):  # 监听
             pygame.draw.rect(screen, color_regret, (button_x, 2 * button_y, button_width, button_height))
             screen.blit(text2, (posx_2, posy_2))
             pygame.display.update()
-
+        """
+        # debug
+        print("white live_three:%d  live_four:%d" % (chess_ai.cal_live_three(chess_ai.pos_white, gomoku_ai.key_white),
+                                                     chess_ai.cal_live_four(chess_ai.pos_white, gomoku_ai.key_white)))
+        print("black live_three:%d  live_four:%d" % (chess_ai.cal_live_three(chess_ai.pos_black, gomoku_ai.key_black),
+                                                     chess_ai.cal_live_four(chess_ai.pos_black, gomoku_ai.key_black)))
+        print("ai act: %d %d " % chess_ai.ab_search())
+        """
 
 def judgeResult(i, j, value):  # 判断游戏是否结束
     global ResultFlag
