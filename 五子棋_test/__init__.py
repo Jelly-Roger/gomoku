@@ -42,7 +42,7 @@ def EventHander(chess_Map, chess_AI, chess_Graph):  # 监听
                             if point.value == key_block:
                                 point.value = key_black  # 黑棋的值
                                 chess_Map.Laststep.append(Element(r, c, point.value))
-                                chess_Map.winner = chess_Map.judge(r, c, point.value)
+                                chess_Map.judge(r, c, point.value)
                                 # 更新黑棋位置
                                 chess_AI.pos_black.append((r, c))
                                 Role = 2
@@ -85,23 +85,52 @@ def main():
             if chess_Map.ChessBoard[r][c].value == key_block:
                 chess_Map.ChessBoard[r][c].value = key_white  # 黑棋的值
                 chess_Map.Laststep.append(Element(r, c, key_white))
-                chess_Map.winner = chess_Map.judge(r, c, key_white)
+                chess_Map.judge(r, c, key_white)
                 chess_AI.pos_white.append((r, c))
                 Role = 1
-            print("white live_three:%d  live_four:%d  rush_four:%d  sleep_three:%d  live_two:%d" % (
-                chess_AI.cal_live_three(chess_AI.pos_white, gomoku_ai.key_white),
-                chess_AI.cal_live_four(chess_AI.pos_white, gomoku_ai.key_white),
-                chess_AI.cal_rush_four(chess_AI.pos_white, gomoku_ai.key_white),
-                chess_AI.cal_sleep_three(chess_AI.pos_white, gomoku_ai.key_white),
-                chess_AI.cal_live_two(chess_AI.pos_white, gomoku_ai.key_white)))
+            debug(chess_AI)
 
-            print("black live_three:%d  live_four:%d  rush_four:%d  sleep_three:%d  live_two:%d" % (
-                chess_AI.cal_live_three(chess_AI.pos_black, gomoku_ai.key_black),
-                chess_AI.cal_live_four(chess_AI.pos_black, gomoku_ai.key_black),
-                chess_AI.cal_rush_four(chess_AI.pos_black, gomoku_ai.key_black),
-                chess_AI.cal_sleep_three(chess_AI.pos_black, gomoku_ai.key_black),
-                chess_AI.cal_live_two(chess_AI.pos_black, gomoku_ai.key_black)))
+
+def debug(chess_AI):
+    print("white live_three:%d  live_four:%d  rush_four:%d  sleep_three:%d  live_two:%d" % (
+        chess_AI.cal_live_three(chess_AI.pos_white, gomoku_ai.key_white),
+        chess_AI.cal_live_four(chess_AI.pos_white, gomoku_ai.key_white),
+        chess_AI.cal_rush_four(chess_AI.pos_white, gomoku_ai.key_white),
+        chess_AI.cal_sleep_three(chess_AI.pos_white, gomoku_ai.key_white),
+        chess_AI.cal_live_two(chess_AI.pos_white, gomoku_ai.key_white)))
+
+    print("black live_three:%d  live_four:%d  rush_four:%d  sleep_three:%d  live_two:%d" % (
+        chess_AI.cal_live_three(chess_AI.pos_black, gomoku_ai.key_black),
+        chess_AI.cal_live_four(chess_AI.pos_black, gomoku_ai.key_black),
+        chess_AI.cal_rush_four(chess_AI.pos_black, gomoku_ai.key_black),
+        chess_AI.cal_sleep_three(chess_AI.pos_black, gomoku_ai.key_black),
+        chess_AI.cal_live_two(chess_AI.pos_black, gomoku_ai.key_black)))
 
 
 if __name__ == '__main__':
     main()
+    """
+    chess_Map = Map()
+    chess_Map.init_board()
+    chess_Map.ChessBoard[7][7].value = key_black
+    chess_Map.ChessBoard[5][5].value = key_white
+    chess_Map.ChessBoard[7][8].value = key_black
+    chess_AI = AI(chess_Map.ChessBoard)
+    print(chess_AI.ab_search())
+    
+    chess_Map.ChessBoard[3][5].value = key_white
+    chess_Map.ChessBoard[4][5].value = key_white
+    chess_Map.ChessBoard[5][5].value = key_white
+    chess_Map.ChessBoard[6][5].value = key_black
+    chess_Map.ChessBoard[7][5].value = key_black
+
+    chess_Map.ChessBoard[4][6].value = key_black
+    chess_Map.ChessBoard[5][6].value = key_black
+    chess_Map.ChessBoard[6][6].value = key_white
+
+    chess_Map.ChessBoard[5][7].value = key_white
+    chess_Map.ChessBoard[6][7].value = key_black
+    chess_Map.ChessBoard[7][7].value = key_black
+
+    debug(AI(chess_Map.ChessBoard))
+    """

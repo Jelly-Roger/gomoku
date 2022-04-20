@@ -1,10 +1,12 @@
 import sys
 import numpy as np
 
-value_lf = 1000
+value_sf = 1000
+value_lf = 400
 value_lt = 100
-value_rf = 100
-value_st = 70
+value_rf = 150
+value_st = 50
+value_ltw = 30
 key_white = 2
 key_black = 1
 key_block = 0
@@ -42,7 +44,7 @@ class AI:
         acts = self.action()
 
         for act in acts:
-            self.push(dep, act)
+            self.push(dep, act)  # debug 原为self.push(dep, act)
             val = max(val, self.min_value(a, b, dep - 1)[0])
             self.pop(dep, act)
             # 剪枝
@@ -116,12 +118,30 @@ class AI:
         num_lt = self.live_three()
         num_rf = self.rush_four()
         num_st = self.sleep_three()
-        return num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st * value_st
+        num_ltw = self.live_two()
+        num_sf = self.succ_five()
+
+        return num_sf * value_sf + num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st * value_st + num_ltw * value_ltw
 
     def in_board(self, row, col):
         if row < 0 or row > self.size - 1 or col < 0 or col > self.size - 1:
             return False
         return True
+
+    def succ_five(self):
+        num_w = self.cal_succ_five(self.pos_white, key_white)
+        num_b = self.cal_succ_five(self.pos_black, key_black)
+        return num_w - num_b
+
+    def cal_succ_five(self, pos, key):
+        num = 0
+        l = len(dx)
+        for r, c in pos:
+            for i in range(l):
+                if self.same(r + dx[i], c + dy[i], key) and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and \
+                        self.same(r + 3 * dx[i], c + 3 * dy[i], key) and self.same(r + 4 * dx[i], c + 4 * dy[i], key):
+                    num = num + 1
+        return num
 
     # 活四
     def live_four(self):
@@ -271,7 +291,9 @@ class AI:
         return num
 
     def live_two(self):
-        pass
+        num_w = self.cal_live_two(self.pos_white, key_white)
+        num_b = self.cal_live_two(self.pos_black, key_black)
+        return num_w - num_b
 
     def cal_live_two(self, pos, key):
         num = 0
