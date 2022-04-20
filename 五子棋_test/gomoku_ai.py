@@ -3,6 +3,7 @@ import numpy as np
 
 value_lf = 1000
 value_lt = 100
+value_rf = 100
 key_white = 2
 key_black = 1
 key_block = 0
@@ -106,7 +107,8 @@ class AI:
     def eval(self):
         num_lf = self.live_four()
         num_lt = self.live_three()
-        return num_lf * value_lf + num_lt * value_lt
+        num_rf = self.rush_four()
+        return num_lf * value_lf + num_lt * value_lt + num_rf*value_rf
 
     def in_board(self, row, col):
         if row < 0 or row > self.size - 1 or col < 0 or col > self.size - 1:
@@ -124,19 +126,19 @@ class AI:
     def cal_live_four(self, pos, key):
         num = 0
         for r, c in pos:
-            if self.same(r + 1, c, 0) and self.same(r - 4, c, 0) \
+            if self.same(r + 1, c, key_block) and self.same(r - 4, c, key_block) \
                     and self.same(r - 1, c, key) and self.same(r - 2, c, key) and self.same(r - 3, c, key):
                 num = num + 1
 
-            if self.same(r + 1, c - 1, 0) and self.same(r - 4, c + 4, 0) \
+            if self.same(r + 1, c - 1, key_block) and self.same(r - 4, c + 4, key_block) \
                     and self.same(r - 1, c + 1, key) and self.same(r - 2, c + 2, key) and self.same(r - 3, c + 3, key):
                 num = num + 1
 
-            if self.same(r, c - 1, 0) and self.same(r, c + 4, 0) \
+            if self.same(r, c - 1, key_block) and self.same(r, c + 4, key_block) \
                     and self.same(r, c + 1, key) and self.same(r, c + 2, key) and self.same(r, c + 3, key):
                 num = num + 1
 
-            if self.same(r - 1, c - 1, 0) and self.same(r + 4, c + 4, 0) \
+            if self.same(r - 1, c - 1, key_block) and self.same(r + 4, c + 4, key_block) \
                     and self.same(r + 1, c + 1, key) and self.same(r + 2, c + 2, key) and self.same(r + 3, c + 3, key):
                 num = num + 1
         return num
@@ -156,35 +158,63 @@ class AI:
         num = 0
         for r, c in pos:
             # 朝上两种
-            if self.same(r + 1, c, 0) and self.same(r - 1, c, key) \
-                    and ((self.same(r - 3, c, 0) and self.same(r - 2, c, key) and (
-                    self.same(r + 2, c, 0) or self.same(r - 4, c, 0)))
-                         or (self.same(r - 2, c, 0) and self.same(r - 3, c, key) and self.same(r - 4, c, 0))):
+            if self.same(r + 1, c, key_block) and self.same(r - 1, c, key) \
+                    and ((self.same(r - 3, c, key_block) and self.same(r - 2, c, key) and (
+                    self.same(r + 2, c, key_block) or self.same(r - 4, c, key_block)))
+                         or (self.same(r - 2, c, key_block) and self.same(r - 3, c, key) and self.same(r - 4, c,
+                                                                                                       key_block))):
                 num = num + 1
             # 斜上两种
-            if self.same(r + 1, c - 1, 0) and self.same(r - 1, c + 1, key) \
-                    and ((self.same(r - 3, c + 3, 0) and self.same(r - 2, c + 2, key) and
-                          (self.same(r + 2, c - 2, 0) or self.same(r - 4, c + 4, 0)))
-                         or (self.same(r - 2, c + 2, 0) and self.same(r - 3, c + 3, key) and self.same(r - 4, c + 4,
-                                                                                                       0))):
+            if self.same(r + 1, c - 1, key_block) and self.same(r - 1, c + 1, key) \
+                    and ((self.same(r - 3, c + 3, key_block) and self.same(r - 2, c + 2, key) and
+                          (self.same(r + 2, c - 2, key_block) or self.same(r - 4, c + 4, key_block)))
+                         or (self.same(r - 2, c + 2, key_block) and self.same(r - 3, c + 3, key) and self.same(r - 4,
+                                                                                                               c + 4,
+                                                                                                               key_block))):
                 num = num + 1
             # 横向两种
-            if self.same(r, c - 1, 0) and self.same(r, c + 1, key) \
-                    and ((self.same(r, c + 3, 0) and self.same(r, c + 2, key)
-                          and (self.same(r, c - 2, 0) or self.same(r, c + 4, 0)))
-                         or (self.same(r, c + 2, 0) and self.same(r, c + 3, key) and self.same(r, c + 4, 0))):
+            if self.same(r, c - 1, key_block) and self.same(r, c + 1, key) \
+                    and ((self.same(r, c + 3, key_block) and self.same(r, c + 2, key)
+                          and (self.same(r, c - 2, key_block) or self.same(r, c + 4, key_block)))
+                         or (self.same(r, c + 2, key_block) and self.same(r, c + 3, key) and self.same(r, c + 4,
+                                                                                                       key_block))):
                 num = num + 1
             # 斜下两种
-            if self.same(r - 1, c - 1, 0) and self.same(r + 1, c + 1, key) \
-                    and ((self.same(r + 3, c + 3, 0) and self.same(r + 2, c + 2, key)
-                          and (self.same(r - 2, c - 2, 0) or self.same(r + 4, c + 4, 0)))
-                         or (self.same(r + 2, c + 2, 0) and self.same(r + 3, c + 3, key) and self.same(r + 4, c + 4,
-                                                                                                       0))):
+            if self.same(r - 1, c - 1, key_block) and self.same(r + 1, c + 1, key) \
+                    and ((self.same(r + 3, c + 3, key_block) and self.same(r + 2, c + 2, key)
+                          and (self.same(r - 2, c - 2, key_block) or self.same(r + 4, c + 4, key_block)))
+                         or (self.same(r + 2, c + 2, key_block) and self.same(r + 3, c + 3, key) and self.same(r + 4,
+                                                                                                               c + 4,
+                                                                                                               key_block))):
                 num = num + 1
         return num
 
     def rush_four(self):
-        pass
+        num_w = self.cal_rush_four(self.pos_white, key_white)
+        num_b = self.cal_rush_four(self.pos_black, key_black)
+        return num_w - num_b
 
     def cal_rush_four(self, pos, key):
-        pass
+        num = 0
+        dx = [-1, -1, 0, 1]
+        dy = [0, 1, 1, 1]
+        s = len(dx)
+
+        for r, c in pos:
+            for i in range(s):
+                if (self.same(r - dx[i], c - dy[i], key_block) ^ self.same(r + dx[i] * 4, c + 4 * dy[i], key_block)) \
+                        and self.same(r + dx[i], c + dy[i], key) and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and \
+                        self.same(r + 3 * dx[i], c + 3 * dy[i], key):
+                    num = num + 1
+                elif self.same(r + dx[i], c + dy[i], key) and self.same(r + 2 * dx[i], c + 2 * dy[i], key_block) and \
+                        self.same(r + 3 * dx[i], c + 3 * dy[i], key) and self.same(r + 4 * dx[i], c + 4 * dy[i], key):
+                    num = num + 1
+                elif self.same(r + dx[i], c + dy[i], key_block) and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and \
+                        self.same(r + 3 * dx[i], c + 3 * dy[i], key) and self.same(r + 4 * dx[i], c + 4 * dy[i], key):
+                    num = num + 1
+                elif self.same(r + dx[i], c + dy[i], key) and self.same(r + 2 * dx[i], c + 2 * dy[i], key) and \
+                        self.same(r + 3 * dx[i], c + 3 * dy[i], key_block) and self.same(r + 4 * dx[i], c + 4 * dy[i],
+                                                                                         key):
+                    num = num + 1
+        return num
+

@@ -10,17 +10,31 @@ def output(l):
 # debug
 if __name__ == '__main__':
     gomoku_graph.initChessSquare(0, 0)
-    gomoku_graph.initChessList[5][6].value = gomoku_ai.key_black
-    gomoku_graph.initChessList[5][7].value = gomoku_ai.key_black
-    gomoku_graph.initChessList[6][5].value = gomoku_ai.key_black
-    gomoku_graph.initChessList[7][5].value = gomoku_ai.key_black
-    gomoku_graph.initChessList[5][4].value = gomoku_ai.key_black
-    gomoku_graph.initChessList[4][5].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[0][0].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[0][1].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[0][2].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[0][3].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[1][0].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[2][0].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[3][0].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[4][0].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[1][1].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[2][2].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[3][3].value = gomoku_ai.key_black
 
     chess_ai = gomoku_ai.AI(gomoku_graph.initChessList)
-    print(chess_ai.ab_search())
-    #acts = chess_ai.action()
-    #output(acts)
+
+    print("white live_three:%d  live_four:%d  rush_four:%d" % (
+        chess_ai.cal_live_three(chess_ai.pos_white, gomoku_ai.key_white),
+        chess_ai.cal_live_four(chess_ai.pos_white, gomoku_ai.key_white),
+        chess_ai.cal_rush_four(chess_ai.pos_white, gomoku_ai.key_white)))
+    print("black live_three:%d  live_four:%d  rush_four:%d" % (
+    chess_ai.cal_live_three(chess_ai.pos_black, gomoku_ai.key_black),
+    chess_ai.cal_live_four(chess_ai.pos_black, gomoku_ai.key_black),
+    chess_ai.cal_rush_four(chess_ai.pos_black, gomoku_ai.key_black)))
+
+    # acts = chess_ai.action()
+    # output(acts)
     """
     for i in range(chess_ai.size):
         for j in range(chess_ai.size):
