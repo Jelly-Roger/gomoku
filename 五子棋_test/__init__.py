@@ -7,12 +7,17 @@ def output(l):
         print("%d %d" % (i[0], i[1]))
 
 
+# debug
 if __name__ == '__main__':
     gomoku_graph.initChessSquare(0, 0)
+    gomoku_graph.initChessList[5][6].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[5][7].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[6][5].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[7][5].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[5][4].value = gomoku_ai.key_black
+    gomoku_graph.initChessList[4][5].value = gomoku_ai.key_black
+
     chess_ai = gomoku_ai.AI(gomoku_graph.initChessList)
-    for i in range(5,8):
-        gomoku_graph.initChessList[i][i].value = gomoku_ai.key_black
-        chess_ai.pos_black.append((i, i))
     print(chess_ai.ab_search())
     #acts = chess_ai.action()
     #output(acts)

@@ -84,7 +84,7 @@ class AI:
         pos = self.pos_white + self.pos_black
         if len(pos) != 0:
             mx_r, mx_c = np.max(pos, axis=0)
-            mn_r, mx_c = np.min(pos, axis=0)
+            mn_r, mn_c = np.min(pos, axis=0)
 
         # 构造可下子的方形区域
         r_begin = max(0, mn_r - 2)
