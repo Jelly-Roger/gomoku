@@ -81,14 +81,14 @@ def main():
         if Role == 1:
             EventHander(chess_Map, chess_AI, chess_Graph)
         elif Role == 2:
-            r, c = chess_AI.ab_search()
+            r, c = chess_AI.ab_search()  # ai下棋
             if chess_Map.ChessBoard[r][c].value == key_block:
                 chess_Map.ChessBoard[r][c].value = key_white  # 黑棋的值
                 chess_Map.Laststep.append(Element(r, c, key_white))
                 chess_Map.judge(r, c, key_white)
                 chess_AI.pos_white.append((r, c))
                 Role = 1
-            debug(chess_AI)
+            #debug(chess_AI)
 
 
 def debug(chess_AI):
