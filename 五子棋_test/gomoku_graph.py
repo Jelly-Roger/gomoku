@@ -128,7 +128,8 @@ class Graph:
         self.background = pygame.image.load("images/background.png")
         self.white = pygame.image.load("images/white.png")
         self.black = pygame.image.load("images/black.png")
-        self.result = pygame.image.load("images/result.jpg")
+        self.result_win = pygame.image.load("images/赢.png")
+        self.result_lose = pygame.image.load("images/输.png")
 
     def load_text(self):
         font = pygame.font.Font(None, 30)
@@ -172,8 +173,11 @@ class Graph:
                     self.screen.blit(self.white, (point.x - 18, point.y - 18))
         pygame.display.update()
 
-    def print_winner(self, delay):
-        self.screen.blit(self.result, (200, 200))
+    def print_winner(self, flag, delay):
+        if flag:
+            self.screen.blit(self.result_win, (200, 200))
+        else:
+            self.screen.blit(self.result_lose, (200, 200))
         pygame.display.update()
         time.sleep(delay)
 

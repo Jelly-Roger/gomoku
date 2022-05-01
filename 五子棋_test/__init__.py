@@ -71,9 +71,11 @@ def main():
         if chess_Map.winner != 0:
             if chess_Map.winner == key_black:
                 print("黑方获胜！")
+                chess_Graph.print_winner(True, 3)
             else:
                 print("白方获胜！")
-            chess_Graph.print_winner(3)
+                chess_Graph.print_winner(False, 3)
+
             chess_Map.clear()
             pygame.quit()
             sys.exit()
