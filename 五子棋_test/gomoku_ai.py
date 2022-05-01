@@ -41,7 +41,7 @@ class AI:
             return self.eval(), 0, 0
         val = -sys.maxsize - 1
         best_act = ()
-        acts = self.action()
+        acts = self.action('near')
 
         for act in acts:
             self.push(dep, act)  # debug 原为self.push(dep, act)
@@ -60,7 +60,7 @@ class AI:
             return self.eval(), 0, 0
         val = sys.maxsize
         best_act = ()
-        acts = self.action()
+        acts = self.action('near')
 
         for act in acts:
             self.push(dep, act)
@@ -89,7 +89,13 @@ class AI:
             self.pos_white.pop()
         self.state_board[act[0]][act[1]].value = key_block
 
-    def action(self):
+    def action(self, method):
+        if method == 'matrix':
+            return self.action_matrix()
+        if method == 'near':
+            return self.action_near()
+
+    def action_matrix(self):
         mx_r, mx_c, mn_r, mn_c = 0, 0, 0, 0
         pos = self.pos_white + self.pos_black
         if len(pos) != 0:
@@ -113,6 +119,18 @@ class AI:
             r = r + 1
         return act
 
+    def action_near(self):
+        board = np.zeros((self.size, self.size))
+        pos = np.array(self.pos_white + self.pos_black)
+        for r, c in pos:
+            r_begin = max(0, r - 1)
+            r_end = min(self.size - 1, r + 1)
+            c_begin = max(0, c - 1)
+            c_end = min(self.size - 1, c + 1)
+            board[r_begin:r_end + 1, c_begin:c_end + 1] = 1
+        board[pos[:, 0], pos[:, 1]] = 0
+        return np.argwhere(board == 1)
+
     def eval(self):
         num_lf = self.live_four()
         num_lt = self.live_three()
@@ -121,7 +139,8 @@ class AI:
         num_ltw = self.live_two()
         num_sf = self.succ_five()
 
-        return num_sf * value_sf + num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st * value_st + num_ltw * value_ltw
+        return num_sf * value_sf + num_lf * value_lf + num_lt * value_lt + num_rf * value_rf + num_st * value_st + \
+               num_ltw * value_ltw
 
     def in_board(self, row, col):
         if row < 0 or row > self.size - 1 or col < 0 or col > self.size - 1:
